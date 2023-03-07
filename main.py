@@ -2,7 +2,7 @@ import sys
 import tkinter
 import ctypes
 import cProfile
-import snakeviz
+import pstats
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import messagebox
@@ -25,21 +25,23 @@ def ask_folder():
 def app():
     """ 実行ボタンの動作"""
     input_dir = folder_path.get()
-    f = open(input_dir, 'r', encoding="utf-8_sig")
-
-    # 受け取ったファイルを二次元配列にする
-    datalist = f.readlines()
-    cProfile.run(process_datalist(datalist), filename='profile_results')
-    
-    # プレビュー表示
-    snakeviz.visualize('profile_results')
-
-    f.close()
+    profile(input_dir)
 
     # メッセージボックス
     messagebox.showinfo("完了", "完了しました。")
 
     sys.exit()
+
+
+def profile(file_path):
+    # プロファイリングを実行
+    profiler = cProfile.Profile()
+    profiler.runctx('exec(open(file_path).read())', globals(), {})
+    
+    # 結果を整形して返却
+    stats = pstats.Stats(profiler)
+    stats.sort_stats(pstats.SortKey.TIME)
+    return stats.print_stats()
 
 
 def delete_window():
