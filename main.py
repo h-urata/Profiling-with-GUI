@@ -33,15 +33,24 @@ def app():
     sys.exit()
 
 
+import cProfile
+import pstats
+
 def profile(file_path):
+    # 外部のPythonファイルのコードを読み込み、グローバル変数を設定
+    with open(file_path, encoding="utf-8") as f:
+        code = compile(f.read(), file_path, 'exec')
+    globals_dict = {'__file__': file_path}
+    
     # プロファイリングを実行
     profiler = cProfile.Profile()
-    profiler.runctx('exec(open(file_path).read())', globals(), {})
+    profiler.runctx(code, globals_dict, {})
     
     # 結果を整形して返却
     stats = pstats.Stats(profiler)
     stats.sort_stats(pstats.SortKey.TIME)
     return stats.print_stats()
+
 
 
 def delete_window():
@@ -54,14 +63,6 @@ def delete_window():
     if ret == True:
         # 「はい」がクリックされたとき
         sys.exit()
-
-
-def process_datalist(datalist):
-    for code_list in datalist:
-        for code in code_list:
-            exec(code)
-
-
 
 
 # """"メインウィンドウ""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
